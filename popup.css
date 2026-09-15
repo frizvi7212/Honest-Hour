@@ -1,0 +1,409 @@
+:root {
+  --bg: #0E100F;
+  --surface: #17191A;
+  --surface-raised: #1E2121;
+  --orange: #E64002;
+  --orange-dim: #E6400226;
+  --blue: #7B8CB8;
+  --blue-dim: #7B8CB826;
+  --text: #F2F1EE;
+  --text-muted: #8C8F8E;
+  --border: rgba(255, 255, 255, 0.07);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  width: 340px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+.wrap { padding: 18px; }
+
+header h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.tagline {
+  margin: 2px 0 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* --- Hero: ring stat, the one bold moment --- */
+
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.ring-wrap {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  flex-shrink: 0;
+}
+
+.ring { width: 100%; height: 100%; transform: rotate(-90deg); }
+
+.ring-track {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 10;
+}
+
+.ring-fill {
+  fill: none;
+  stroke: var(--orange);
+  stroke-width: 10;
+  stroke-linecap: round;
+  stroke-dasharray: 326.7;
+  stroke-dashoffset: 326.7;
+  transition: stroke-dashoffset 0.4s ease;
+}
+
+.ring-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.ring-value {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.ring-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+.hero-side {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hero-side-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.hero-side-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--blue);
+}
+
+/* --- Tabs --- */
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 14px;
+}
+
+.tab-btn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 4px;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.tab-btn.active {
+  background: var(--orange);
+  color: #fff;
+}
+
+.tab-panel.hidden { display: none; }
+
+/* --- Shared card / section look --- */
+
+section.todo,
+section.week,
+section.study,
+section.setting-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+section h2,
+.setting-title {
+  font-size: 12px;
+  font-weight: 600;
+  margin: 0 0 10px;
+  color: var(--text-muted);
+  display: block;
+}
+
+.field-label {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 8px 0 4px;
+}
+
+.field-label:first-child { margin-top: 0; }
+
+.hint {
+  margin: 8px 0 0;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* --- Toggle (reading mode) --- */
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.toggle input[type="checkbox"] {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--text-muted);
+  border-radius: 4px;
+  background: var(--bg);
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.toggle input[type="checkbox"]:checked {
+  background: var(--orange);
+  border-color: var(--orange);
+}
+
+.toggle input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* --- Inputs and selects --- */
+
+select,
+input[type="text"],
+input[type="number"] {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  font-size: 12px;
+  font-family: inherit;
+  background: var(--bg);
+  color: var(--text);
+}
+
+select:focus,
+input:focus {
+  outline: 2px solid var(--blue);
+  outline-offset: 1px;
+}
+
+/* --- To-do list --- */
+
+.todo-form {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.todo-form input[type="text"] { flex: 1; }
+
+.todo-form button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 9px;
+  background: var(--orange);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.todo-form button:hover { opacity: 0.9; }
+
+.todo-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.todo-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.todo-item:hover { background: var(--surface-raised); }
+
+.todo-item input[type="checkbox"] {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--text-muted);
+  border-radius: 4px;
+  background: var(--bg);
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.todo-item input[type="checkbox"]:checked {
+  background: var(--orange);
+  border-color: var(--orange);
+}
+
+.todo-item input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.todo-item .todo-text { flex: 1; word-break: break-word; }
+
+/* --- Week / top sites bars --- */
+
+.week-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.week-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.week-row .day {
+  width: 30px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.week-row .bar-track {
+  flex: 1;
+  height: 7px;
+  background: var(--bg);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.week-row .bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--blue);
+  border-radius: 4px;
+}
+
+.week-row .amount {
+  width: 42px;
+  text-align: right;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.empty { font-size: 12px; color: var(--text-muted); }
+
+/* --- Study mode --- */
+
+.study-start-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: var(--orange);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.study-start-btn:hover { opacity: 0.9; }
+
+.study-start-btn.secondary {
+  background: var(--blue-dim);
+  color: var(--blue);
+  border: 1px solid var(--blue);
+}
+
+.hidden { display: none; }
+
+.study-timer {
+  font-size: 34px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--orange);
+  font-variant-numeric: tabular-nums;
+  padding: 12px 0 4px;
+}
+
+footer {
+  margin-top: 4px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+footer p {
+  margin: 0;
+  font-size: 10px;
+  color: var(--text-muted);
+  text-align: center;
+}
