@@ -75,15 +75,7 @@ also needs its own page refresh (F5), since its content script instance goes sta
   sub-resource requests — this is intentional, to avoid breaking unrelated sites that
   happen to load something from a blocked domain.
 
-## Not yet built
 
-- [ ] Tune the default active/idle thresholds against real usage
-- [ ] Swap placeholder icons for real ones
-- [ ] Replace plain CSS in `popup.css` with compiled Tailwind (CDN is blocked by MV3 CSP —
-      needs a local build step, e.g. `npx tailwindcss -i input.css -o popup.css --minify`)
-- [ ] Data retention/cleanup (e.g. trim `dailyLogs` older than N weeks)
-- [ ] UI pass — the popup has grown a lot; consider collapsible sections or tabs instead
-      of one long scroll
 
 ## Known gotchas already handled
 
