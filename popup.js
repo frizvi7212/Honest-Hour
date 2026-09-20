@@ -23,16 +23,22 @@ function lastNDays(n) {
 }
 
 async function render() {
-  const { dailyLogs = {}, readingModeUntil = 0 } = await chrome.storage.local.get([
-    "dailyLogs",
-    "readingModeUntil"
-  ]);
+  const { dailyLogs = {}, readingModeUntil = 0 } =
+    await chrome.storage.local.get(["dailyLogs", "readingModeUntil"]);
 
   const todayKey = dateKey(new Date());
-  const today = dailyLogs[todayKey] || { totalOpenSeconds: 0, totalActiveSeconds: 0, byDomain: {} };
+  const today = dailyLogs[todayKey] || {
+    totalOpenSeconds: 0,
+    totalActiveSeconds: 0,
+    byDomain: {},
+  };
 
-  document.getElementById("open-today").textContent = formatHM(today.totalOpenSeconds);
-  document.getElementById("active-today").textContent = formatHM(today.totalActiveSeconds);
+  document.getElementById("open-today").textContent = formatHM(
+    today.totalOpenSeconds,
+  );
+  document.getElementById("active-today").textContent = formatHM(
+    today.totalActiveSeconds,
+  );
   updateRing(today.totalOpenSeconds, today.totalActiveSeconds);
 
   renderTopSites(today.byDomain || {});
@@ -50,7 +56,7 @@ async function render() {
   const days = lastNDays(7);
   const maxOpen = Math.max(
     1,
-    ...days.map((d) => (dailyLogs[dateKey(d)]?.totalOpenSeconds || 0))
+    ...days.map((d) => dailyLogs[dateKey(d)]?.totalOpenSeconds || 0),
   );
 
   const weekList = document.getElementById("week-list");
@@ -58,10 +64,14 @@ async function render() {
   const hasAnyData = days.some((d) => dailyLogs[dateKey(d)]);
 
   if (!hasAnyData) {
-    weekList.innerHTML = '<p class="empty">No activity logged yet this week.</p>';
+    weekList.innerHTML =
+      '<p class="empty">No activity logged yet this week.</p>';
   } else {
     days.forEach((d) => {
-      const log = dailyLogs[dateKey(d)] || { totalOpenSeconds: 0, totalActiveSeconds: 0 };
+      const log = dailyLogs[dateKey(d)] || {
+        totalOpenSeconds: 0,
+        totalActiveSeconds: 0,
+      };
       const label = d.toLocaleDateString([], { weekday: "short" }).slice(0, 2);
       const pct = Math.round((log.totalActiveSeconds / maxOpen) * 100);
 
@@ -80,7 +90,11 @@ async function render() {
 function renderTopSites(byDomain) {
   const list = document.getElementById("top-sites-list");
   const entries = Object.entries(byDomain)
-    .map(([hostname, d]) => ({ hostname, openSeconds: d.openSeconds || 0, activeSeconds: d.activeSeconds || 0 }))
+    .map(([hostname, d]) => ({
+      hostname,
+      openSeconds: d.openSeconds || 0,
+      activeSeconds: d.activeSeconds || 0,
+    }))
     .sort((a, b) => b.activeSeconds - a.activeSeconds)
     .slice(0, 5);
 
@@ -110,24 +124,32 @@ document.getElementById("open-record-page").addEventListener("click", () => {
   chrome.tabs.create({ url: chrome.runtime.getURL("record.html") });
 });
 
-document.getElementById("reading-mode-toggle").addEventListener("change", async (e) => {
-  const enabled = e.target.checked;
-  await chrome.runtime.sendMessage({ type: "reading-mode-toggle", enabled });
-  render();
-});
+document
+  .getElementById("reading-mode-toggle")
+  .addEventListener("change", async (e) => {
+    const enabled = e.target.checked;
+    await chrome.runtime.sendMessage({ type: "reading-mode-toggle", enabled });
+    render();
+  });
 
-document.getElementById("tick-interval").addEventListener("change", async (e) => {
-  const seconds = Number(e.target.value);
-  await chrome.runtime.sendMessage({ type: "set-tick-seconds", seconds });
-});
+document
+  .getElementById("tick-interval")
+  .addEventListener("change", async (e) => {
+    const seconds = Number(e.target.value);
+    await chrome.runtime.sendMessage({ type: "set-tick-seconds", seconds });
+  });
 
-document.getElementById("nudge-interval").addEventListener("change", async (e) => {
-  const seconds = Number(e.target.value);
-  await chrome.runtime.sendMessage({ type: "set-nudge-seconds", seconds });
-});
+document
+  .getElementById("nudge-interval")
+  .addEventListener("change", async (e) => {
+    const seconds = Number(e.target.value);
+    await chrome.runtime.sendMessage({ type: "set-nudge-seconds", seconds });
+  });
 
 async function initNudgeIntervalPicker() {
-  const { nudgeAfterSeconds = 300 } = await chrome.storage.local.get(["nudgeAfterSeconds"]);
+  const { nudgeAfterSeconds = 300 } = await chrome.storage.local.get([
+    "nudgeAfterSeconds",
+  ]);
   const select = document.getElementById("nudge-interval");
   if ([...select.options].some((o) => Number(o.value) === nudgeAfterSeconds)) {
     select.value = String(nudgeAfterSeconds);
@@ -207,7 +229,11 @@ document.getElementById("todo-form").addEventListener("submit", async (e) => {
   if (!text) return;
 
   const todos = await loadTodos();
-  todos.push({ id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, text, createdAt: Date.now() });
+  todos.push({
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    text,
+    createdAt: Date.now(),
+  });
   await saveTodos(todos);
   renderTodos(todos);
   input.value = "";
@@ -226,16 +252,23 @@ function formatCountdown(ms) {
 }
 
 async function renderStudyMode() {
-  const { studyMode, studyDraft } = await chrome.storage.local.get(["studyMode", "studyDraft"]);
+  const { studyMode, studyDraft } = await chrome.storage.local.get([
+    "studyMode",
+    "studyDraft",
+  ]);
   const setupEl = document.getElementById("study-setup");
   const activeEl = document.getElementById("study-active");
 
   if (studyMode?.active && studyMode.endsAt > Date.now()) {
     setupEl.classList.add("hidden");
     activeEl.classList.remove("hidden");
-    document.getElementById("study-timer").textContent = formatCountdown(studyMode.endsAt - Date.now());
+    document.getElementById("study-timer").textContent = formatCountdown(
+      studyMode.endsAt - Date.now(),
+    );
     document.getElementById("study-blocked-list").textContent =
-      studyMode.blockedHosts.length > 0 ? `Blocked: ${studyMode.blockedHosts.join(", ")}` : "No sites blocked this session.";
+      studyMode.blockedHosts.length > 0
+        ? `Blocked: ${studyMode.blockedHosts.join(", ")}`
+        : "No sites blocked this session.";
   } else {
     setupEl.classList.remove("hidden");
     activeEl.classList.add("hidden");
@@ -244,8 +277,10 @@ async function renderStudyMode() {
     // time the user tabs away to go copy a URL.
     if (studyDraft && !studyRestored) {
       studyRestored = true;
-      if (studyDraft.duration != null) document.getElementById("study-duration").value = studyDraft.duration;
-      if (studyDraft.sitesText != null) document.getElementById("study-sites").value = studyDraft.sitesText;
+      if (studyDraft.duration != null)
+        document.getElementById("study-duration").value = studyDraft.duration;
+      if (studyDraft.sitesText != null)
+        document.getElementById("study-sites").value = studyDraft.sitesText;
     }
   }
 }
@@ -256,20 +291,32 @@ function saveStudyDraft() {
   chrome.storage.local.set({
     studyDraft: {
       duration: document.getElementById("study-duration").value,
-      sitesText: document.getElementById("study-sites").value
-    }
+      sitesText: document.getElementById("study-sites").value,
+    },
   });
 }
 
-document.getElementById("study-duration").addEventListener("input", saveStudyDraft);
-document.getElementById("study-sites").addEventListener("input", saveStudyDraft);
+document
+  .getElementById("study-duration")
+  .addEventListener("input", saveStudyDraft);
+document
+  .getElementById("study-sites")
+  .addEventListener("input", saveStudyDraft);
 
 document.getElementById("study-start").addEventListener("click", async () => {
-  const duration = Number(document.getElementById("study-duration").value) || 25;
+  const duration =
+    Number(document.getElementById("study-duration").value) || 25;
   const sitesRaw = document.getElementById("study-sites").value;
-  const hostnames = sitesRaw.split(",").map((s) => s.trim()).filter(Boolean);
+  const hostnames = sitesRaw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
 
-  await chrome.runtime.sendMessage({ type: "start-study-mode", durationMinutes: duration, hostnames });
+  await chrome.runtime.sendMessage({
+    type: "start-study-mode",
+    durationMinutes: duration,
+    hostnames,
+  });
   await chrome.storage.local.remove("studyDraft"); // session started — clear the scratch draft
   renderStudyMode();
 });
@@ -292,9 +339,15 @@ function updateRing(openSeconds, activeSeconds) {
 
 document.querySelectorAll(".tab-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
-    document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
-    document.querySelectorAll(".tab-panel").forEach((p) => p.classList.add("hidden"));
+    document
+      .querySelectorAll(".tab-btn")
+      .forEach((b) => b.classList.remove("active"));
+    document
+      .querySelectorAll(".tab-panel")
+      .forEach((p) => p.classList.add("hidden"));
     btn.classList.add("active");
-    document.querySelector(`.tab-panel[data-panel="${btn.dataset.tab}"]`).classList.remove("hidden");
+    document
+      .querySelector(`.tab-panel[data-panel="${btn.dataset.tab}"]`)
+      .classList.remove("hidden");
   });
 });

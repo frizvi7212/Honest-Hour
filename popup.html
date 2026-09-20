@@ -1,124 +1,193 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8" />
-<title>Honest Hour</title>
-<link rel="stylesheet" href="popup.css" />
-</head>
-<body>
-  <div class="wrap">
-    <header>
-      <h1>Honest Hour</h1>
-      <p class="tagline">An honest picture, not a judgment.</p>
-    </header>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Honest Hour</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>Honest Hour</h1>
+        <p class="tagline">An honest picture, not a judgment.</p>
+      </header>
 
-    <section class="hero">
-      <div class="ring-wrap">
-        <svg class="ring" viewBox="0 0 120 120">
-          <circle class="ring-track" cx="60" cy="60" r="52" />
-          <circle class="ring-fill" id="ring-fill" cx="60" cy="60" r="52" />
-        </svg>
-        <div class="ring-center">
-          <span class="ring-value" id="active-today">—</span>
-          <span class="ring-label">active</span>
+      <section class="hero">
+        <div class="ring-wrap">
+          <svg class="ring" viewBox="0 0 120 120">
+            <circle class="ring-track" cx="60" cy="60" r="52" />
+            <circle class="ring-fill" id="ring-fill" cx="60" cy="60" r="52" />
+          </svg>
+          <div class="ring-center">
+            <span class="ring-value" id="active-today">—</span>
+            <span class="ring-label">active</span>
+          </div>
         </div>
+        <div class="hero-side">
+          <span class="hero-side-label">Screen open today</span>
+          <span class="hero-side-value" id="open-today">—</span>
+        </div>
+      </section>
+
+      <nav class="tabs" id="tabs">
+        <button type="button" class="tab-btn active" data-tab="today">
+          Today
+        </button>
+        <button type="button" class="tab-btn tab-insights" data-tab="insights">
+          Insights
+        </button>
+        <button type="button" class="tab-btn" data-tab="settings">
+          Settings
+        </button>
+      </nav>
+
+      <div class="tab-panel" data-panel="today">
+        <div class="mode-row">
+          <label class="mode-card mode-reading" for="reading-mode-toggle">
+            <input
+              type="checkbox"
+              id="reading-mode-toggle"
+              class="mode-checkbox-hidden"
+            />
+            <span class="mode-card-label">Reading mode</span>
+            <span class="mode-card-value" id="reading-mode-hint">Off</span>
+          </label>
+          <button
+            type="button"
+            class="mode-card mode-study"
+            id="study-card-toggle"
+            aria-expanded="false"
+          >
+            <span class="mode-card-label">Study mode</span>
+            <span class="mode-card-value" id="study-card-state"
+              >Start a session</span
+            >
+          </button>
+        </div>
+
+        <div id="study-expanded" class="study-expanded hidden">
+          <section class="study">
+            <div id="study-setup">
+              <label class="field-label" for="study-duration"
+                >Duration (minutes)</label
+              >
+              <input
+                type="number"
+                id="study-duration"
+                min="1"
+                max="480"
+                value="25"
+              />
+              <label class="field-label" for="study-sites"
+                >Sites to block (comma-separated)</label
+              >
+              <input
+                type="text"
+                id="study-sites"
+                placeholder="youtube.com, instagram.com"
+                autocomplete="off"
+              />
+              <button type="button" id="study-start" class="study-start-btn">
+                Start study mode
+              </button>
+              <p class="hint">
+                No pausing or early exit once it starts — that's the point.
+              </p>
+            </div>
+            <div id="study-active" class="hidden">
+              <div class="study-timer" id="study-timer">--:--</div>
+              <p class="hint" id="study-blocked-list"></p>
+            </div>
+          </section>
+        </div>
+
+        <section class="todo">
+          <h2>Today's list</h2>
+          <form id="todo-form" class="todo-form">
+            <input
+              type="text"
+              id="todo-input"
+              placeholder="Add a task…"
+              maxlength="200"
+              autocomplete="off"
+            />
+            <button type="submit">Add</button>
+          </form>
+          <ul id="todo-list" class="todo-list"></ul>
+          <p class="hint">
+            Checked items vanish immediately. Anything left auto-clears after 24
+            hours.
+          </p>
+        </section>
       </div>
-      <div class="hero-side">
-        <span class="hero-side-label">Screen open today</span>
-        <span class="hero-side-value" id="open-today">—</span>
+
+      <div class="tab-panel hidden" data-panel="insights">
+        <section class="week">
+          <h2>This week</h2>
+          <div id="week-list" class="week-list">
+            <p class="empty">Loading…</p>
+          </div>
+        </section>
+
+        <section class="week">
+          <h2>Top sites today</h2>
+          <div id="top-sites-list" class="week-list">
+            <p class="empty">Loading…</p>
+          </div>
+        </section>
       </div>
-    </section>
 
-    <nav class="tabs" id="tabs">
-      <button type="button" class="tab-btn active" data-tab="today">Today</button>
-      <button type="button" class="tab-btn" data-tab="insights">Insights</button>
-      <button type="button" class="tab-btn" data-tab="study">Study</button>
-      <button type="button" class="tab-btn" data-tab="settings">Settings</button>
-    </nav>
+      <div class="tab-panel hidden" data-panel="settings">
+        <section class="setting-card">
+          <span class="setting-title">Nudge voice</span>
+          <button
+            type="button"
+            id="open-record-page"
+            class="study-start-btn secondary"
+          >
+            🎙️ Record my own nudge voice
+          </button>
+          <p class="hint">
+            Recorded locally, never uploaded. Managed on its own page.
+          </p>
+        </section>
 
-    <div class="tab-panel" data-panel="today">
-      <section class="todo">
-        <h2>Today's list</h2>
-        <form id="todo-form" class="todo-form">
-          <input type="text" id="todo-input" placeholder="Add a task…" maxlength="200" autocomplete="off" />
-          <button type="submit">Add</button>
-        </form>
-        <ul id="todo-list" class="todo-list"></ul>
-        <p class="hint">Checked items vanish immediately. Anything left auto-clears after 24 hours.</p>
-      </section>
+        <section class="setting-card">
+          <label class="field-label" for="tick-interval"
+            >Check-in frequency</label
+          >
+          <select id="tick-interval">
+            <option value="15">Every 15s</option>
+            <option value="30" selected>Every 30s (default)</option>
+            <option value="60">Every 60s</option>
+          </select>
+          <p class="hint" id="tick-interval-hint">
+            Larger values = coarser accuracy. 30s or lower recommended.
+            Sub-minute values only work while testing unpacked — see README.
+          </p>
+        </section>
+
+        <section class="setting-card">
+          <label class="field-label" for="nudge-interval"
+            >Nudge after inactivity</label
+          >
+          <select id="nudge-interval">
+            <option value="15">15s (testing)</option>
+            <option value="30">30s (testing)</option>
+            <option value="60">1 minute (testing)</option>
+            <option value="300" selected>5 minutes (default)</option>
+            <option value="600">10 minutes</option>
+          </select>
+          <p class="hint">
+            How long you need to be idle before the "Still there?" nudge fires.
+          </p>
+        </section>
+      </div>
+
+      <footer>
+        <p>Everything above is stored only on this device.</p>
+      </footer>
     </div>
-
-    <div class="tab-panel hidden" data-panel="insights">
-      <section class="week">
-        <h2>This week</h2>
-        <div id="week-list" class="week-list"><p class="empty">Loading…</p></div>
-      </section>
-
-      <section class="week">
-        <h2>Top sites today</h2>
-        <div id="top-sites-list" class="week-list"><p class="empty">Loading…</p></div>
-      </section>
-    </div>
-
-    <div class="tab-panel hidden" data-panel="study">
-      <section class="study">
-        <div id="study-setup">
-          <label class="field-label" for="study-duration">Duration (minutes)</label>
-          <input type="number" id="study-duration" min="1" max="480" value="25" />
-          <label class="field-label" for="study-sites">Sites to block (comma-separated)</label>
-          <input type="text" id="study-sites" placeholder="youtube.com, instagram.com" autocomplete="off" />
-          <button type="button" id="study-start" class="study-start-btn">Start study mode</button>
-          <p class="hint">No pausing or early exit once it starts — that's the point.</p>
-        </div>
-        <div id="study-active" class="hidden">
-          <div class="study-timer" id="study-timer">--:--</div>
-          <p class="hint" id="study-blocked-list"></p>
-        </div>
-      </section>
-    </div>
-
-    <div class="tab-panel hidden" data-panel="settings">
-      <section class="setting-card">
-        <label class="toggle">
-          <input type="checkbox" id="reading-mode-toggle" />
-          <span>Reading mode (30 min, pauses idle checks)</span>
-        </label>
-        <p class="hint" id="reading-mode-hint"></p>
-      </section>
-
-      <section class="setting-card">
-        <span class="setting-title">Nudge voice</span>
-        <button type="button" id="open-record-page" class="study-start-btn secondary">🎙️ Record my own nudge voice</button>
-        <p class="hint">Recorded locally, never uploaded. Managed on its own page.</p>
-      </section>
-
-      <section class="setting-card">
-        <label class="field-label" for="tick-interval">Check-in frequency</label>
-        <select id="tick-interval">
-          <option value="15">Every 15s</option>
-          <option value="30" selected>Every 30s (default)</option>
-          <option value="60">Every 60s</option>
-        </select>
-        <p class="hint" id="tick-interval-hint">Larger values = coarser accuracy. 30s or lower recommended. Sub-minute values only work while testing unpacked — see README.</p>
-      </section>
-
-      <section class="setting-card">
-        <label class="field-label" for="nudge-interval">Nudge after inactivity</label>
-        <select id="nudge-interval">
-          <option value="15">15s (testing)</option>
-          <option value="30">30s (testing)</option>
-          <option value="60">1 minute (testing)</option>
-          <option value="300" selected>5 minutes (default)</option>
-          <option value="600">10 minutes</option>
-        </select>
-        <p class="hint">How long you need to be idle before the "Still there?" nudge fires.</p>
-      </section>
-    </div>
-
-    <footer>
-      <p>Everything above is stored only on this device.</p>
-    </footer>
-  </div>
-  <script src="popup.js"></script>
-</body>
+    <script src="popup.js"></script>
+  </body>
 </html>
