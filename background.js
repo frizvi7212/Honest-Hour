@@ -123,7 +123,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     sendResponse({ ok: true });
   }
   if (msg?.type === "reading-mode-toggle") {
-    state.readingModeUntil = msg.enabled ? Date.now() + 30 * 60 * 1000 : 0;
+    const minutes = Math.max(1, Number(msg.durationMinutes) || 30);
+    state.readingModeUntil = msg.enabled ? Date.now() + minutes * 60 * 1000 : 0;
     chrome.storage.local.set({ readingModeUntil: state.readingModeUntil });
     sendResponse({ ok: true, readingModeUntil: state.readingModeUntil });
   }
@@ -340,12 +341,18 @@ async function tick() {
   const pendingActiveSeconds = state.pendingActiveMs / 1000;
 
   let activeSeconds;
-  if (inReadingMode || state.tabAudible) {
-    activeSeconds = elapsedSeconds; // full credit — no discrete pings needed
+  if (state.tabAudible) {
+    // A playing tab counts as active even if Chrome isn't the focused
+    // window — listening to a video/podcast doesn't require looking at the
+    // screen. Still needs a real tracked tab, just not window focus.
+    activeSeconds = state.activeHostname ? elapsedSeconds : 0;
+  } else if (inReadingMode) {
+    activeSeconds =
+      state.windowFocused && state.activeHostname ? elapsedSeconds : 0;
   } else {
     activeSeconds = Math.min(pendingActiveSeconds, elapsedSeconds);
+    if (!state.windowFocused || !state.activeHostname) activeSeconds = 0;
   }
-  if (!state.windowFocused || !state.activeHostname) activeSeconds = 0;
 
   const secondsSinceActivity = (now - state.lastActivityTs) / 1000;
 

@@ -31,6 +31,11 @@ function blobToDataUrl(blob) {
 }
 
 async function startRecording() {
+  statusEl.textContent =
+    "Requesting microphone access — check for a browser permission prompt…";
+  statusEl.classList.remove("live");
+  recordBtn.disabled = true;
+
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     chunks = [];
@@ -44,12 +49,17 @@ async function startRecording() {
       previewControls.classList.remove("hidden");
       recordBtn.classList.add("hidden");
       timerEl.textContent = "";
-      statusEl.textContent = "Recorded. Preview it, then save if you're happy with it.";
+      statusEl.classList.remove("live");
+      statusEl.textContent =
+        "Recorded. Preview it, then save if you're happy with it.";
     };
 
     mediaRecorder.start();
     recordBtn.classList.add("recording");
-    statusEl.textContent = "Recording…";
+    recordBtn.textContent = "⏹️";
+    recordBtn.disabled = false;
+    statusEl.textContent = "Recording — tap again to stop early";
+    statusEl.classList.add("live");
 
     const startedAt = Date.now();
     timerInterval = setInterval(() => {
@@ -59,6 +69,8 @@ async function startRecording() {
 
     stopTimeout = setTimeout(stopRecording, MAX_RECORD_MS);
   } catch (err) {
+    recordBtn.disabled = false;
+    statusEl.classList.remove("live");
     statusEl.textContent = `Couldn't access the microphone: ${err?.message || err}`;
   }
 }
@@ -70,6 +82,7 @@ function stopRecording() {
     mediaRecorder.stop();
   }
   recordBtn.classList.remove("recording");
+  recordBtn.textContent = "🎙️";
 }
 
 recordBtn.addEventListener("click", () => {
@@ -86,11 +99,25 @@ playBtn.addEventListener("click", () => {
 });
 
 saveBtn.addEventListener("click", async () => {
-  if (!recordedDataUrl) return;
-  await chrome.storage.local.set({ nudgeVoiceClip: recordedDataUrl });
-  statusEl.textContent = "Saved. Your recorded voice will play for inactivity nudges from now on.";
-  previewControls.classList.add("hidden");
-  clearControls.classList.remove("hidden");
+  if (!recordedDataUrl) {
+    console.log("[Honest Hour] save clicked but recordedDataUrl is empty/null");
+    return;
+  }
+  console.log(
+    "[Honest Hour] attempting save, dataUrl length:",
+    recordedDataUrl.length,
+  );
+  try {
+    await chrome.storage.local.set({ nudgeVoiceClip: recordedDataUrl });
+    console.log("[Honest Hour] save succeeded");
+    statusEl.textContent =
+      "Saved. Your recorded voice will play for inactivity nudges from now on.";
+    previewControls.classList.add("hidden");
+    clearControls.classList.remove("hidden");
+  } catch (err) {
+    console.error("[Honest Hour] save failed:", err);
+    statusEl.textContent = `Couldn't save: ${err?.message || err}`;
+  }
 });
 
 discardBtn.addEventListener("click", () => {
@@ -105,13 +132,15 @@ clearBtn.addEventListener("click", async () => {
   await chrome.storage.local.remove("nudgeVoiceClip");
   clearControls.classList.add("hidden");
   recordBtn.classList.remove("hidden");
-  statusEl.textContent = "Removed. Nudges will use the default notification sound again.";
+  statusEl.textContent =
+    "Removed. Nudges will use the default notification sound again.";
 });
 
 // Reflect existing state on load
 chrome.storage.local.get(["nudgeVoiceClip"]).then(({ nudgeVoiceClip }) => {
   if (nudgeVoiceClip) {
     clearControls.classList.remove("hidden");
-    statusEl.textContent = "You already have a saved clip. Record a new one to replace it.";
+    statusEl.textContent =
+      "You already have a saved clip. Record a new one to replace it.";
   }
 });

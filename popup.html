@@ -139,6 +139,21 @@
 
       <div class="tab-panel hidden" data-panel="settings">
         <section class="setting-card">
+          <label class="field-label" for="reading-duration"
+            >Reading mode duration</label
+          >
+          <select id="reading-duration">
+            <option value="15">15 minutes</option>
+            <option value="30" selected>30 minutes (default)</option>
+            <option value="60">1 hour</option>
+            <option value="90">1.5 hours</option>
+          </select>
+          <p class="hint">
+            How long Reading Mode stays on when you switch it on from Today.
+          </p>
+        </section>
+
+        <section class="setting-card">
           <span class="setting-title">Nudge voice</span>
           <button
             type="button"

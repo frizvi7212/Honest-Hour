@@ -39,37 +39,38 @@
         color: var(--text);
       }
       .card {
-        max-width: 420px;
+        max-width: 520px;
         width: 100%;
-        padding: 32px;
+        padding: 56px 48px;
         background: var(--surface);
         border: 1px solid var(--border);
-        border-radius: 18px;
+        border-radius: 24px;
         text-align: center;
       }
       h1 {
-        font-size: 19px;
-        margin: 0 0 4px;
+        font-size: 26px;
+        margin: 0 0 8px;
         font-weight: 700;
       }
       p.sub {
         color: var(--text-muted);
-        font-size: 13px;
-        margin: 4px 0 24px;
+        font-size: 14px;
+        margin: 4px 0 40px;
+        line-height: 1.6;
       }
       .mic-btn {
-        width: 92px;
-        height: 92px;
+        width: 128px;
+        height: 128px;
         border-radius: 50%;
         border: none;
         background: var(--blue);
         color: #0e100f;
-        font-size: 30px;
+        font-size: 42px;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 14px;
+        margin: 0 auto 20px;
         transition: background 0.15s ease;
       }
       .mic-btn.recording {
@@ -83,21 +84,21 @@
           box-shadow: 0 0 0 0 rgba(230, 64, 2, 0.45);
         }
         50% {
-          box-shadow: 0 0 0 14px rgba(230, 64, 2, 0);
+          box-shadow: 0 0 0 18px rgba(230, 64, 2, 0);
         }
       }
       .timer {
-        font-size: 20px;
+        font-size: 26px;
         font-weight: 700;
         color: var(--orange);
-        min-height: 26px;
+        min-height: 32px;
         font-variant-numeric: tabular-nums;
       }
       .status {
-        font-size: 13px;
-        margin: 10px 0 4px;
+        font-size: 14px;
+        margin: 14px 0 6px;
         color: var(--text-muted);
-        min-height: 18px;
+        min-height: 20px;
       }
       .status.live {
         color: var(--orange);
@@ -105,9 +106,9 @@
       }
       .row {
         display: flex;
-        gap: 8px;
+        gap: 10px;
         justify-content: center;
-        margin-top: 16px;
+        margin-top: 24px;
         flex-wrap: wrap;
       }
       button.secondary {

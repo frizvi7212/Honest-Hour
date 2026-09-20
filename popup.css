@@ -20,9 +20,6 @@ button {
 button:disabled {
   cursor: not-allowed;
 }
-label {
-  cursor: pointer;
-}
 h1,
 h2,
 p {
@@ -187,6 +184,7 @@ header h1 {
   text-align: left;
   font-family: inherit;
   display: block;
+  cursor: pointer;
 }
 
 .mode-card-label {
@@ -263,6 +261,7 @@ section h2,
   font-size: 11px;
   color: var(--text-muted);
   margin: 8px 0 4px;
+  cursor: default;
 }
 
 .field-label:first-child {

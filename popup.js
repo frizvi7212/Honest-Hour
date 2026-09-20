@@ -128,9 +128,37 @@ document
   .getElementById("reading-mode-toggle")
   .addEventListener("change", async (e) => {
     const enabled = e.target.checked;
-    await chrome.runtime.sendMessage({ type: "reading-mode-toggle", enabled });
+    const { readingDurationMinutes = 30 } = await chrome.storage.local.get([
+      "readingDurationMinutes",
+    ]);
+    await chrome.runtime.sendMessage({
+      type: "reading-mode-toggle",
+      enabled,
+      durationMinutes: readingDurationMinutes,
+    });
     render();
   });
+
+document
+  .getElementById("reading-duration")
+  .addEventListener("change", async (e) => {
+    await chrome.storage.local.set({
+      readingDurationMinutes: Number(e.target.value),
+    });
+  });
+
+async function initReadingDurationPicker() {
+  const { readingDurationMinutes = 30 } = await chrome.storage.local.get([
+    "readingDurationMinutes",
+  ]);
+  const select = document.getElementById("reading-duration");
+  if (
+    [...select.options].some((o) => Number(o.value) === readingDurationMinutes)
+  ) {
+    select.value = String(readingDurationMinutes);
+  }
+}
+initReadingDurationPicker();
 
 document
   .getElementById("tick-interval")
