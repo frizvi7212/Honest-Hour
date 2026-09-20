@@ -1,97 +1,135 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8" />
-<title>Record your nudge voice — Honest Hour</title>
-<style>
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f9fafb;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    color: #111827;
-  }
-  .card {
-    max-width: 420px;
-    width: 100%;
-    padding: 32px;
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-    text-align: center;
-  }
-  h1 { font-size: 20px; margin: 0 0 4px; }
-  p { color: #6b7280; font-size: 13px; margin: 4px 0 20px; }
-  .mic-btn {
-    width: 88px;
-    height: 88px;
-    border-radius: 50%;
-    border: none;
-    background: #4f46e5;
-    color: #fff;
-    font-size: 28px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 12px;
-  }
-  .mic-btn.recording {
-    background: #dc2626;
-    animation: pulse 1s infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.4); }
-    50% { box-shadow: 0 0 0 12px rgba(220,38,38,0); }
-  }
-  .timer { font-size: 13px; color: #6b7280; min-height: 18px; }
-  .status { font-size: 13px; margin: 16px 0; color: #374151; min-height: 18px; }
-  .row { display: flex; gap: 8px; justify-content: center; margin-top: 12px; }
-  button.secondary {
-    padding: 8px 16px;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
-    background: #fff;
-    font-size: 13px;
-    cursor: pointer;
-  }
-  button.primary {
-    padding: 8px 16px;
-    border-radius: 8px;
-    border: none;
-    background: #4f46e5;
-    color: #fff;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-  }
-  button:disabled { opacity: 0.5; cursor: not-allowed; }
-  .hidden { display: none; }
-</style>
-</head>
-<body>
-  <div class="card">
-    <h1>Record your nudge voice</h1>
-    <p>This stays on your device — it's never uploaded anywhere. Say something short, like "Hey, still there?" (max 5 seconds).</p>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Record your nudge voice — Honest Hour</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #0e100f;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #f2f1ee;
+      }
+      .card {
+        max-width: 420px;
+        width: 100%;
+        padding: 32px;
+        background: #7b8cb8af;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        text-align: center;
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0 0 4px;
+      }
+      p {
+        color: #6b7280;
+        font-size: 13px;
+        margin: 4px 0 20px;
+      }
+      .mic-btn {
+        width: 88px;
+        height: 88px;
+        border-radius: 50%;
+        border: none;
+        background: #4f46e5;
+        color: #fff;
+        font-size: 28px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 12px;
+      }
+      .mic-btn.recording {
+        background: #e64002;
+        animation: pulse 1s infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+        }
+        50% {
+          box-shadow: 0 0 0 12px rgba(220, 38, 38, 0);
+        }
+      }
+      .timer {
+        font-size: 13px;
+        color: #17181b;
+        min-height: 18px;
+      }
+      .status {
+        font-size: 13px;
+        margin: 16px 0;
+        color: #374151;
+        min-height: 18px;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        margin-top: 12px;
+      }
+      button.secondary {
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        background: #e64002;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      button.primary {
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: none;
+        background: #e64002;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Record your nudge voice</h1>
+      <p>
+        This stays on your device — it's never uploaded anywhere. Say something
+        short, like "Hey, still there?" (max 5 seconds).
+      </p>
 
-    <button id="record-btn" class="mic-btn">🎙️</button>
-    <div class="timer" id="timer"></div>
-    <div class="status" id="status"></div>
+      <button id="record-btn" class="mic-btn">🎙️</button>
+      <div class="timer" id="timer"></div>
+      <div class="status" id="status"></div>
 
-    <div id="preview-controls" class="row hidden">
-      <button id="play-btn" class="secondary">▶ Preview</button>
-      <button id="save-btn" class="primary">Save this clip</button>
-      <button id="discard-btn" class="secondary">Discard &amp; retry</button>
+      <div id="preview-controls" class="row hidden">
+        <button id="play-btn" class="secondary">▶ Preview</button>
+        <button id="save-btn" class="primary">Save this clip</button>
+        <button id="discard-btn" class="secondary">Discard &amp; retry</button>
+      </div>
+
+      <div id="clear-controls" class="row hidden">
+        <button id="clear-btn" class="secondary">
+          Remove saved clip (use default sound instead)
+        </button>
+      </div>
     </div>
-
-    <div id="clear-controls" class="row hidden">
-      <button id="clear-btn" class="secondary">Remove saved clip (use default sound instead)</button>
-    </div>
-  </div>
-  <script src="record.js"></script>
-</body>
+    <script src="record.js"></script>
+  </body>
 </html>

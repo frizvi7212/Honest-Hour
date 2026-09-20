@@ -23,11 +23,13 @@ let state = {
   tabAudible: false, // playing audio/video — counts like reading mode
   lastActivityTs: 0, // updated by content script heartbeats
   pendingActiveMs: 0, // accumulated since the last tick flush
-  readingModeUntil: 0 // epoch ms; if in the future, idle checks are suppressed
+  readingModeUntil: 0, // epoch ms; if in the future, idle checks are suppressed
 };
 
 async function setupAlarm() {
-  const { tickSeconds = DEFAULT_TICK_SECONDS } = await chrome.storage.local.get(["tickSeconds"]);
+  const { tickSeconds = DEFAULT_TICK_SECONDS } = await chrome.storage.local.get(
+    ["tickSeconds"],
+  );
   await chrome.alarms.clear(HEARTBEAT_ALARM);
   chrome.alarms.create(HEARTBEAT_ALARM, { periodInMinutes: tickSeconds / 60 });
 }
@@ -57,7 +59,10 @@ chrome.runtime.onStartup.addListener(() => {
 
 async function refreshActiveTab() {
   try {
-    const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      lastFocusedWindow: true,
+    });
     if (tab && tab.url) {
       state.activeTabId = tab.id;
       state.activeHostname = safeHostname(tab.url);
@@ -86,7 +91,8 @@ function safeHostname(url) {
 
 chrome.tabs.onActivated.addListener(refreshActiveTab);
 chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
-  if (changeInfo.status === "complete" || "audible" in changeInfo) refreshActiveTab();
+  if (changeInfo.status === "complete" || "audible" in changeInfo)
+    refreshActiveTab();
 });
 chrome.windows.onFocusChanged.addListener((windowId) => {
   state.windowFocused = windowId !== chrome.windows.WINDOW_ID_NONE;
@@ -103,12 +109,16 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     // since this runs to completion before any other message is handled.
     // Storage is only a restart-safety backup, never read-before-write here.
     const PING_CREDIT_CAP_MS = 10000;
-    const creditMs = state.lastActivityTs > 0 ? Math.min(ts - state.lastActivityTs, PING_CREDIT_CAP_MS) : 0;
+    const creditMs =
+      state.lastActivityTs > 0
+        ? Math.min(ts - state.lastActivityTs, PING_CREDIT_CAP_MS)
+        : 0;
     state.lastActivityTs = ts;
-    state.pendingActiveMs = (state.pendingActiveMs || 0) + Math.max(creditMs, 0);
+    state.pendingActiveMs =
+      (state.pendingActiveMs || 0) + Math.max(creditMs, 0);
     chrome.storage.local.set({
       lastActivityTs: state.lastActivityTs,
-      pendingActiveMs: state.pendingActiveMs
+      pendingActiveMs: state.pendingActiveMs,
     });
     sendResponse({ ok: true });
   }
@@ -163,13 +173,24 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 async function startStudyMode(durationMinutes, hostnames) {
   const minutes = Math.max(1, Number(durationMinutes) || 25);
   const cleanHosts = (hostnames || [])
-    .map((h) => h.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/.*$/, ""))
+    .map((h) =>
+      h
+        .trim()
+        .toLowerCase()
+        .replace(/^https?:\/\//, "")
+        .replace(/\/.*$/, ""),
+    )
     .filter(Boolean);
 
   const endsAt = Date.now() + minutes * 60 * 1000;
 
   await chrome.storage.local.set({
-    studyMode: { active: true, endsAt, blockedHosts: cleanHosts, durationMinutes: minutes }
+    studyMode: {
+      active: true,
+      endsAt,
+      blockedHosts: cleanHosts,
+      durationMinutes: minutes,
+    },
   });
 
   await applyBlockRules(cleanHosts);
@@ -195,7 +216,10 @@ async function kickOpenTabsOffBlockedHosts(hostnames) {
     }
     if (hostnames.some((h) => hostname === h || hostname.endsWith(`.${h}`))) {
       chrome.tabs.reload(tab.id).catch((err) => {
-        console.warn("[Honest Hour] couldn't reload tab for study mode:", err?.message || err);
+        console.warn(
+          "[Honest Hour] couldn't reload tab for study mode:",
+          err?.message || err,
+        );
       });
     }
   }
@@ -209,20 +233,30 @@ async function applyBlockRules(hostnames) {
     priority: 1,
     action: {
       type: "redirect",
-      redirect: { extensionPath: `/blocked.html?host=${encodeURIComponent(host)}` }
+      redirect: {
+        extensionPath: `/blocked.html?host=${encodeURIComponent(host)}`,
+      },
     },
-    condition: { urlFilter: `||${host}^`, resourceTypes: ["main_frame"] }
+    condition: { urlFilter: `||${host}^`, resourceTypes: ["main_frame"] },
   }));
-  await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules });
+  await chrome.declarativeNetRequest.updateDynamicRules({
+    removeRuleIds,
+    addRules,
+  });
 }
 
 async function endStudyMode() {
   const existing = await chrome.declarativeNetRequest.getDynamicRules();
   await chrome.declarativeNetRequest.updateDynamicRules({
-    removeRuleIds: existing.map((r) => r.id)
+    removeRuleIds: existing.map((r) => r.id),
   });
   await chrome.storage.local.set({
-    studyMode: { active: false, endsAt: 0, blockedHosts: [], durationMinutes: 0 }
+    studyMode: {
+      active: false,
+      endsAt: 0,
+      blockedHosts: [],
+      durationMinutes: 0,
+    },
   });
   await chrome.alarms.clear(STUDY_WARN_ALARM);
 
@@ -233,13 +267,16 @@ async function endStudyMode() {
       iconUrl: "icons/icon128.png",
       title: "Study session done",
       message: "Nice work — sites are unblocked now.",
-      priority: 1
+      priority: 1,
     },
     () => {
       if (chrome.runtime.lastError) {
-        console.warn("[Honest Hour] study-done notification failed:", chrome.runtime.lastError.message);
+        console.warn(
+          "[Honest Hour] study-done notification failed:",
+          chrome.runtime.lastError.message,
+        );
       }
-    }
+    },
   );
 }
 
@@ -251,13 +288,16 @@ function warnStudyModeEnding() {
       iconUrl: "icons/icon128.png",
       title: "Almost done",
       message: "Study mode ends in a few seconds.",
-      priority: 1
+      priority: 1,
     },
     () => {
       if (chrome.runtime.lastError) {
-        console.warn("[Honest Hour] study-warn notification failed:", chrome.runtime.lastError.message);
+        console.warn(
+          "[Honest Hour] study-warn notification failed:",
+          chrome.runtime.lastError.message,
+        );
       }
-    }
+    },
   );
 }
 
@@ -269,16 +309,22 @@ async function tick() {
     "readingModeUntil",
     "lastActivityTs",
     "pendingActiveMs",
-    "lastTickTs"
+    "lastTickTs",
   ]);
 
   state.readingModeUntil = stored.readingModeUntil || 0;
-  state.lastActivityTs = Math.max(stored.lastActivityTs || 0, state.lastActivityTs || 0);
+  state.lastActivityTs = Math.max(
+    stored.lastActivityTs || 0,
+    state.lastActivityTs || 0,
+  );
   // Reconcile in-memory vs stored pendingActiveMs — whichever is larger is
   // more current. If the worker just restarted, in-memory is 0 and storage
   // has the real value; if the worker survived, in-memory is authoritative
   // and storage may lag slightly behind the latest fire-and-forget write.
-  state.pendingActiveMs = Math.max(stored.pendingActiveMs || 0, state.pendingActiveMs || 0);
+  state.pendingActiveMs = Math.max(
+    stored.pendingActiveMs || 0,
+    state.pendingActiveMs || 0,
+  );
   const inReadingMode = state.readingModeUntil > now;
 
   // Real elapsed time since the last tick, not an assumed constant — this
@@ -303,6 +349,12 @@ async function tick() {
 
   const secondsSinceActivity = (now - state.lastActivityTs) / 1000;
 
+  console.log(
+    `[Honest Hour] tick | host=${state.activeHostname} focused=${state.windowFocused} ` +
+      `elapsed=${elapsedSeconds.toFixed(1)}s credited=${activeSeconds.toFixed(1)}s ` +
+      `reading=${inReadingMode} audible=${state.tabAudible}`,
+  );
+
   if (state.activeHostname) {
     await recordTick(state.activeHostname, elapsedSeconds, activeSeconds);
   }
@@ -321,7 +373,11 @@ async function recordTick(hostname, openDeltaSeconds, activeDeltaSeconds) {
   const dateKey = new Date().toISOString().slice(0, 10);
 
   const { dailyLogs = {} } = await chrome.storage.local.get(["dailyLogs"]);
-  const day = dailyLogs[dateKey] || { totalOpenSeconds: 0, totalActiveSeconds: 0, byDomain: {} };
+  const day = dailyLogs[dateKey] || {
+    totalOpenSeconds: 0,
+    totalActiveSeconds: 0,
+    byDomain: {},
+  };
   const domain = day.byDomain[hostname] || { openSeconds: 0, activeSeconds: 0 };
 
   domain.openSeconds += openDeltaSeconds;
@@ -338,7 +394,9 @@ async function recordTick(hostname, openDeltaSeconds, activeDeltaSeconds) {
 // --- Gentle inactivity nudge (once per idle stretch, not repeated) ---
 
 async function maybeNudge(secondsSinceActivity, inReadingMode) {
-  const { nudgeAfterSeconds = 300 } = await chrome.storage.local.get(["nudgeAfterSeconds"]);
+  const { nudgeAfterSeconds = 300 } = await chrome.storage.local.get([
+    "nudgeAfterSeconds",
+  ]);
 
   if (inReadingMode) return;
   if (secondsSinceActivity < nudgeAfterSeconds) return;
@@ -346,13 +404,20 @@ async function maybeNudge(secondsSinceActivity, inReadingMode) {
   // "Have we already nudged for THIS idle stretch?" — keyed off the
   // lastActivityTs that started it, so a worker restart mid-stretch doesn't
   // cause a duplicate notification, and a fresh ping naturally clears it.
-  const { notifiedForActivityTs } = await chrome.storage.local.get(["notifiedForActivityTs"]);
+  const { notifiedForActivityTs } = await chrome.storage.local.get([
+    "notifiedForActivityTs",
+  ]);
   if (notifiedForActivityTs === state.lastActivityTs) return;
 
-  await chrome.storage.local.set({ notifiedForActivityTs: state.lastActivityTs });
+  await chrome.storage.local.set({
+    notifiedForActivityTs: state.lastActivityTs,
+  });
 
   const minutes = Math.round(nudgeAfterSeconds / 60);
-  const timeLabel = minutes >= 1 ? `${minutes} minute${minutes === 1 ? "" : "s"}` : `${nudgeAfterSeconds} seconds`;
+  const timeLabel =
+    minutes >= 1
+      ? `${minutes} minute${minutes === 1 ? "" : "s"}`
+      : `${nudgeAfterSeconds} seconds`;
 
   chrome.notifications.create(
     `honest-hour-nudge-${Date.now()}`,
@@ -361,13 +426,16 @@ async function maybeNudge(secondsSinceActivity, inReadingMode) {
       iconUrl: "icons/icon128.png",
       title: "Still there?",
       message: `It's been a quiet ${timeLabel}. No judgment — just checking in.`,
-      priority: 0
+      priority: 0,
     },
     () => {
       if (chrome.runtime.lastError) {
-        console.warn("[Honest Hour] notification failed:", chrome.runtime.lastError.message);
+        console.warn(
+          "[Honest Hour] notification failed:",
+          chrome.runtime.lastError.message,
+        );
       }
-    }
+    },
   );
 
   await playNudgeVoiceIfAny();
@@ -380,13 +448,17 @@ async function ensureOffscreenDocument() {
     await chrome.offscreen.createDocument({
       url: OFFSCREEN_DOCUMENT_PATH,
       reasons: ["AUDIO_PLAYBACK"],
-      justification: "Play a locally recorded nudge sound when the user has been inactive"
+      justification:
+        "Play a locally recorded nudge sound when the user has been inactive",
     });
   } catch (err) {
     // "Only a single offscreen document may be created" is expected once
     // one already exists — anything else is worth knowing about.
     if (!String(err?.message || err).includes("single offscreen document")) {
-      console.warn("[Honest Hour] offscreen document error:", err?.message || err);
+      console.warn(
+        "[Honest Hour] offscreen document error:",
+        err?.message || err,
+      );
     }
   }
 }
@@ -396,8 +468,10 @@ async function playNudgeVoiceIfAny() {
   if (!nudgeVoiceClip) return; // no custom clip recorded — default notification sound is enough
 
   await ensureOffscreenDocument();
-  chrome.runtime.sendMessage({ type: "play-nudge-audio", dataUrl: nudgeVoiceClip }).catch(() => {
-    // Offscreen document may still be spinning up — acceptable to miss
-    // one playback rather than delay or duplicate the notification.
-  });
+  chrome.runtime
+    .sendMessage({ type: "play-nudge-audio", dataUrl: nudgeVoiceClip })
+    .catch(() => {
+      // Offscreen document may still be spinning up — acceptable to miss
+      // one playback rather than delay or duplicate the notification.
+    });
 }

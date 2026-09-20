@@ -13,9 +13,20 @@ function sendActivityPing() {
   lastPingSentAt = now;
 
   try {
-    chrome.runtime.sendMessage({ type: "activity-ping" })
+    chrome.runtime
+      .sendMessage({ type: "activity-ping" })
+      .then(() => {
+        console.log(
+          "[Honest Hour] ping OK at",
+          new Date(now).toLocaleTimeString(),
+        );
+      })
       .catch((err) => {
-        console.warn("[Honest Hour] ping FAILED at", new Date(now).toLocaleTimeString(), err?.message || err);
+        console.warn(
+          "[Honest Hour] ping FAILED at",
+          new Date(now).toLocaleTimeString(),
+          err?.message || err,
+        );
       });
   } catch (err) {
     // chrome.runtime.sendMessage can throw SYNCHRONOUSLY (not just reject)
@@ -23,14 +34,27 @@ function sendActivityPing() {
     // reloaded while this page stayed open. A .catch() alone can't catch
     // that; this try/catch is the actual fix. Safe to ignore either way —
     // a page refresh gives this page a fresh, valid script instance.
-    console.warn("[Honest Hour] ping threw synchronously (stale context):", err?.message || err);
+    console.warn(
+      "[Honest Hour] ping threw synchronously (stale context):",
+      err?.message || err,
+    );
   }
 }
 
-const ACTIVITY_EVENTS = ["keydown", "mousemove", "mousedown", "scroll", "wheel", "touchstart"];
+const ACTIVITY_EVENTS = [
+  "keydown",
+  "mousemove",
+  "mousedown",
+  "scroll",
+  "wheel",
+  "touchstart",
+];
 
 ACTIVITY_EVENTS.forEach((evt) => {
-  document.addEventListener(evt, sendActivityPing, { passive: true, capture: true });
+  document.addEventListener(evt, sendActivityPing, {
+    passive: true,
+    capture: true,
+  });
 });
 
 // Fire one immediately on load so a page you land on and start reading
