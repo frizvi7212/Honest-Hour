@@ -50,7 +50,7 @@ async function render() {
   toggle.checked = active;
   hint.textContent = active
     ? `On until ${new Date(readingModeUntil).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
-    : "";
+    : "Off";
 
   // Week view
   const days = lastNDays(7);
@@ -251,6 +251,8 @@ function formatCountdown(ms) {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
+let studyIsActive = false;
+
 async function renderStudyMode() {
   const { studyMode, studyDraft } = await chrome.storage.local.get([
     "studyMode",
@@ -258,20 +260,26 @@ async function renderStudyMode() {
   ]);
   const setupEl = document.getElementById("study-setup");
   const activeEl = document.getElementById("study-active");
+  const expandedEl = document.getElementById("study-expanded");
+  const stateEl = document.getElementById("study-card-state");
 
-  if (studyMode?.active && studyMode.endsAt > Date.now()) {
+  studyIsActive = !!(studyMode?.active && studyMode.endsAt > Date.now());
+
+  if (studyIsActive) {
     setupEl.classList.add("hidden");
     activeEl.classList.remove("hidden");
-    document.getElementById("study-timer").textContent = formatCountdown(
-      studyMode.endsAt - Date.now(),
-    );
+    expandedEl.classList.remove("hidden"); // stay visible while a session is running — this isn't optional to collapse
+    const remaining = formatCountdown(studyMode.endsAt - Date.now());
+    document.getElementById("study-timer").textContent = remaining;
     document.getElementById("study-blocked-list").textContent =
       studyMode.blockedHosts.length > 0
         ? `Blocked: ${studyMode.blockedHosts.join(", ")}`
         : "No sites blocked this session.";
+    stateEl.textContent = remaining;
   } else {
     setupEl.classList.remove("hidden");
     activeEl.classList.add("hidden");
+    stateEl.textContent = "Start a session";
     // Restore whatever was being typed before the popup was last closed —
     // popups are destroyed on close, so this would otherwise vanish every
     // time the user tabs away to go copy a URL.
@@ -284,6 +292,15 @@ async function renderStudyMode() {
     }
   }
 }
+
+document.getElementById("study-card-toggle").addEventListener("click", () => {
+  if (studyIsActive) return; // stays open while a session is running — nothing to toggle
+  const expandedEl = document.getElementById("study-expanded");
+  const nowHidden = expandedEl.classList.toggle("hidden");
+  document
+    .getElementById("study-card-toggle")
+    .setAttribute("aria-expanded", String(!nowHidden));
+});
 
 let studyRestored = false;
 

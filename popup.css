@@ -1,17 +1,33 @@
 :root {
-  --bg: #0E100F;
-  --surface: #17191A;
-  --surface-raised: #1E2121;
-  --orange: #E64002;
-  --orange-dim: #E6400226;
-  --blue: #7B8CB8;
-  --blue-dim: #7B8CB826;
-  --text: #F2F1EE;
-  --text-muted: #8C8F8E;
+  --bg: #0e100f;
+  --surface: #17191a;
+  --surface-raised: #1e2121;
+  --orange: #e64002;
+  --orange-dim: #e6400226;
+  --blue: #7b8cb8;
+  --blue-dim: #7b8cb826;
+  --text: #f2f1ee;
+  --text-muted: #8c8f8e;
   --border: rgba(255, 255, 255, 0.07);
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+label {
+  cursor: pointer;
+}
+h1,
+h2,
+p {
+  cursor: default;
+}
 
 body {
   margin: 0;
@@ -21,7 +37,9 @@ body {
   background: var(--bg);
 }
 
-.wrap { padding: 18px; }
+.wrap {
+  padding: 18px;
+}
 
 header h1 {
   margin: 0;
@@ -56,7 +74,11 @@ header h1 {
   flex-shrink: 0;
 }
 
-.ring { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
 
 .ring-track {
   fill: none;
@@ -135,12 +157,84 @@ header h1 {
   cursor: pointer;
 }
 
+.tab-btn.tab-insights {
+  color: var(--blue);
+}
+
 .tab-btn.active {
   background: var(--orange);
   color: #fff;
 }
 
-.tab-panel.hidden { display: none; }
+.tab-panel.hidden {
+  display: none;
+}
+
+/* --- Mode cards: Reading mode + Study mode, grouped together on Today --- */
+
+.mode-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.mode-card {
+  flex: 1;
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  text-align: left;
+  font-family: inherit;
+  display: block;
+}
+
+.mode-card-label {
+  display: block;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.mode-card-value {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.mode-checkbox-hidden {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mode-reading {
+  border-color: var(--blue);
+  position: relative;
+}
+
+.mode-reading .mode-card-label {
+  color: var(--blue);
+}
+
+.mode-study {
+  border-color: var(--orange);
+  color: inherit;
+}
+
+.mode-study .mode-card-value {
+  color: var(--orange);
+}
+
+.study-expanded {
+  margin-bottom: 10px;
+}
+.study-expanded.hidden {
+  display: none;
+}
 
 /* --- Shared card / section look --- */
 
@@ -171,7 +265,9 @@ section h2,
   margin: 8px 0 4px;
 }
 
-.field-label:first-child { margin-top: 0; }
+.field-label:first-child {
+  margin-top: 0;
+}
 
 .hint {
   margin: 8px 0 0;
@@ -248,7 +344,9 @@ input:focus {
   margin-bottom: 8px;
 }
 
-.todo-form input[type="text"] { flex: 1; }
+.todo-form input[type="text"] {
+  flex: 1;
+}
 
 .todo-form button {
   padding: 8px 14px;
@@ -261,7 +359,9 @@ input:focus {
   cursor: pointer;
 }
 
-.todo-form button:hover { opacity: 0.9; }
+.todo-form button:hover {
+  opacity: 0.9;
+}
 
 .todo-list {
   list-style: none;
@@ -283,13 +383,15 @@ input:focus {
   font-size: 12px;
 }
 
-.todo-item:hover { background: var(--surface-raised); }
+.todo-item:hover {
+  background: var(--surface-raised);
+}
 
 .todo-item input[type="checkbox"] {
   appearance: none;
   width: 16px;
   height: 16px;
-  border: 1.5px solid var(--text-muted);
+  border: 1.5px solid var(--blue);
   border-radius: 4px;
   background: var(--bg);
   cursor: pointer;
@@ -314,7 +416,10 @@ input:focus {
   transform: rotate(45deg);
 }
 
-.todo-item .todo-text { flex: 1; word-break: break-word; }
+.todo-item .todo-text {
+  flex: 1;
+  word-break: break-word;
+}
 
 /* --- Week / top sites bars --- */
 
@@ -359,7 +464,10 @@ input:focus {
   flex-shrink: 0;
 }
 
-.empty { font-size: 12px; color: var(--text-muted); }
+.empty {
+  font-size: 12px;
+  color: var(--text-muted);
+}
 
 /* --- Study mode --- */
 
@@ -376,7 +484,9 @@ input:focus {
   cursor: pointer;
 }
 
-.study-start-btn:hover { opacity: 0.9; }
+.study-start-btn:hover {
+  opacity: 0.9;
+}
 
 .study-start-btn.secondary {
   background: var(--blue-dim);
@@ -384,7 +494,9 @@ input:focus {
   border: 1px solid var(--blue);
 }
 
-.hidden { display: none; }
+.hidden {
+  display: none;
+}
 
 .study-timer {
   font-size: 34px;

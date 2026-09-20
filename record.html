@@ -4,8 +4,29 @@
     <meta charset="UTF-8" />
     <title>Record your nudge voice — Honest Hour</title>
     <style>
+      :root {
+        --bg: #0e100f;
+        --surface: #17191a;
+        --orange: #e64002;
+        --blue: #7b8cb8;
+        --text: #f2f1ee;
+        --text-muted: #9a9d9c;
+        --border: rgba(255, 255, 255, 0.08);
+      }
       * {
         box-sizing: border-box;
+      }
+      button {
+        cursor: pointer;
+      }
+      button:disabled {
+        cursor: not-allowed;
+      }
+      h1,
+      p,
+      .timer,
+      .status {
+        cursor: default;
       }
       body {
         margin: 0;
@@ -13,93 +34,106 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #0e100f;
+        background: var(--bg);
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        color: #f2f1ee;
+        color: var(--text);
       }
       .card {
         max-width: 420px;
         width: 100%;
         padding: 32px;
-        background: #7b8cb8af;
-        border-radius: 16px;
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 18px;
         text-align: center;
       }
       h1 {
-        font-size: 20px;
+        font-size: 19px;
         margin: 0 0 4px;
+        font-weight: 700;
       }
-      p {
-        color: #6b7280;
+      p.sub {
+        color: var(--text-muted);
         font-size: 13px;
-        margin: 4px 0 20px;
+        margin: 4px 0 24px;
       }
       .mic-btn {
-        width: 88px;
-        height: 88px;
+        width: 92px;
+        height: 92px;
         border-radius: 50%;
         border: none;
-        background: #4f46e5;
-        color: #fff;
-        font-size: 28px;
+        background: var(--blue);
+        color: #0e100f;
+        font-size: 30px;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 12px;
+        margin: 0 auto 14px;
+        transition: background 0.15s ease;
       }
       .mic-btn.recording {
-        background: #e64002;
+        background: var(--orange);
+        color: #fff;
         animation: pulse 1s infinite;
       }
       @keyframes pulse {
         0%,
         100% {
-          box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+          box-shadow: 0 0 0 0 rgba(230, 64, 2, 0.45);
         }
         50% {
-          box-shadow: 0 0 0 12px rgba(220, 38, 38, 0);
+          box-shadow: 0 0 0 14px rgba(230, 64, 2, 0);
         }
       }
       .timer {
-        font-size: 13px;
-        color: #17181b;
-        min-height: 18px;
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--orange);
+        min-height: 26px;
+        font-variant-numeric: tabular-nums;
       }
       .status {
         font-size: 13px;
-        margin: 16px 0;
-        color: #374151;
+        margin: 10px 0 4px;
+        color: var(--text-muted);
         min-height: 18px;
+      }
+      .status.live {
+        color: var(--orange);
+        font-weight: 600;
       }
       .row {
         display: flex;
         gap: 8px;
         justify-content: center;
-        margin-top: 12px;
+        margin-top: 16px;
+        flex-wrap: wrap;
       }
       button.secondary {
-        padding: 8px 16px;
-        border-radius: 8px;
-        border: 1px solid #e5e7eb;
-        background: #e64002;
+        padding: 9px 16px;
+        border-radius: 9px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--text);
         font-size: 13px;
         cursor: pointer;
+      }
+      button.secondary:hover {
+        border-color: var(--blue);
       }
       button.primary {
-        padding: 8px 16px;
-        border-radius: 8px;
+        padding: 9px 16px;
+        border-radius: 9px;
         border: none;
-        background: #e64002;
+        background: var(--orange);
         color: #fff;
         font-size: 13px;
-        font-weight: 600;
+        font-weight: 700;
         cursor: pointer;
       }
-      button:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
+      button.primary:hover {
+        opacity: 0.9;
       }
       .hidden {
         display: none;
@@ -109,14 +143,14 @@
   <body>
     <div class="card">
       <h1>Record your nudge voice</h1>
-      <p>
+      <p class="sub">
         This stays on your device — it's never uploaded anywhere. Say something
         short, like "Hey, still there?" (max 5 seconds).
       </p>
 
       <button id="record-btn" class="mic-btn">🎙️</button>
       <div class="timer" id="timer"></div>
-      <div class="status" id="status"></div>
+      <div class="status" id="status">Tap the mic to start recording.</div>
 
       <div id="preview-controls" class="row hidden">
         <button id="play-btn" class="secondary">▶ Preview</button>
