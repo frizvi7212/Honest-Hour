@@ -23,8 +23,7 @@ function lastNDays(n) {
 }
 
 async function render() {
-  const { dailyLogs = {}, readingModeUntil = 0 } =
-    await chrome.storage.local.get(["dailyLogs", "readingModeUntil"]);
+  const { dailyLogs = {} } = await chrome.storage.local.get(["dailyLogs"]);
 
   const todayKey = dateKey(new Date());
   const today = dailyLogs[todayKey] || {
@@ -42,15 +41,6 @@ async function render() {
   updateRing(today.totalOpenSeconds, today.totalActiveSeconds);
 
   renderTopSites(today.byDomain || {});
-
-  // Reading mode toggle state
-  const toggle = document.getElementById("reading-mode-toggle");
-  const hint = document.getElementById("reading-mode-hint");
-  const active = readingModeUntil > Date.now();
-  toggle.checked = active;
-  hint.textContent = active
-    ? `On until ${new Date(readingModeUntil).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
-    : "Off";
 
   // Week view
   const days = lastNDays(7);
@@ -120,45 +110,109 @@ function renderTopSites(byDomain) {
   });
 }
 
-document.getElementById("open-record-page").addEventListener("click", () => {
+document.getElementById("voice-card-toggle").addEventListener("click", () => {
   chrome.tabs.create({ url: chrome.runtime.getURL("record.html") });
 });
 
-document
-  .getElementById("reading-mode-toggle")
-  .addEventListener("change", async (e) => {
-    const enabled = e.target.checked;
-    const { readingDurationMinutes = 30 } = await chrome.storage.local.get([
+async function renderVoiceCard() {
+  const { nudgeVoiceClip } = await chrome.storage.local.get(["nudgeVoiceClip"]);
+  document.getElementById("voice-card-state").textContent = nudgeVoiceClip
+    ? "Voice saved"
+    : "Not set";
+}
+renderVoiceCard();
+
+// --- Reading mode: expandable card, same pattern as Study Mode, but with
+// an early "Turn off" since it's a convenience toggle, not a commitment ---
+
+let readingIsActive = false;
+
+function updateReadingTurnOnLabel() {
+  const mins = document.getElementById("reading-duration-inline").value;
+  document.getElementById("reading-turn-on").textContent =
+    `Turn on for ${mins}m`;
+}
+
+async function renderReadingMode() {
+  const { readingModeUntil = 0, readingDurationMinutes = 30 } =
+    await chrome.storage.local.get([
+      "readingModeUntil",
       "readingDurationMinutes",
     ]);
-    await chrome.runtime.sendMessage({
-      type: "reading-mode-toggle",
-      enabled,
-      durationMinutes: readingDurationMinutes,
-    });
-    render();
-  });
+  readingIsActive = readingModeUntil > Date.now();
+
+  const stateEl = document.getElementById("reading-card-state");
+  const setupEl = document.getElementById("reading-setup");
+  const activeEl = document.getElementById("reading-active");
+  const expandedEl = document.getElementById("reading-expanded");
+  const durationSelect = document.getElementById("reading-duration-inline");
+
+  if (readingIsActive) {
+    setupEl.classList.add("hidden");
+    activeEl.classList.remove("hidden");
+    expandedEl.classList.remove("hidden"); // stays visible while active
+    const remaining = formatCountdown(readingModeUntil - Date.now());
+    document.getElementById("reading-timer").textContent = remaining;
+    stateEl.textContent = remaining;
+  } else {
+    setupEl.classList.remove("hidden");
+    activeEl.classList.add("hidden");
+    stateEl.textContent = "Off";
+    if (
+      [...durationSelect.options].some(
+        (o) => Number(o.value) === readingDurationMinutes,
+      )
+    ) {
+      durationSelect.value = String(readingDurationMinutes);
+    }
+    updateReadingTurnOnLabel();
+  }
+}
+
+document.getElementById("reading-card-toggle").addEventListener("click", () => {
+  if (readingIsActive) return; // stays open while active — use "Turn off early" instead
+  const expandedEl = document.getElementById("reading-expanded");
+  const nowHidden = expandedEl.classList.toggle("hidden");
+  document
+    .getElementById("reading-card-toggle")
+    .setAttribute("aria-expanded", String(!nowHidden));
+});
 
 document
-  .getElementById("reading-duration")
+  .getElementById("reading-duration-inline")
   .addEventListener("change", async (e) => {
     await chrome.storage.local.set({
       readingDurationMinutes: Number(e.target.value),
     });
+    updateReadingTurnOnLabel();
   });
 
-async function initReadingDurationPicker() {
-  const { readingDurationMinutes = 30 } = await chrome.storage.local.get([
-    "readingDurationMinutes",
-  ]);
-  const select = document.getElementById("reading-duration");
-  if (
-    [...select.options].some((o) => Number(o.value) === readingDurationMinutes)
-  ) {
-    select.value = String(readingDurationMinutes);
-  }
-}
-initReadingDurationPicker();
+document
+  .getElementById("reading-turn-on")
+  .addEventListener("click", async () => {
+    const minutes =
+      Number(document.getElementById("reading-duration-inline").value) || 30;
+    await chrome.runtime.sendMessage({
+      type: "reading-mode-toggle",
+      enabled: true,
+      durationMinutes: minutes,
+    });
+    renderReadingMode();
+  });
+
+document
+  .getElementById("reading-turn-off")
+  .addEventListener("click", async () => {
+    await chrome.runtime.sendMessage({
+      type: "reading-mode-toggle",
+      enabled: false,
+    });
+    document.getElementById("reading-expanded").classList.add("hidden");
+    renderReadingMode();
+  });
+
+renderReadingMode();
+setInterval(renderReadingMode, 1000); // live countdown while active
 
 document
   .getElementById("tick-interval")
@@ -307,7 +361,7 @@ async function renderStudyMode() {
   } else {
     setupEl.classList.remove("hidden");
     activeEl.classList.add("hidden");
-    stateEl.textContent = "Start a session";
+    stateEl.textContent = "Start";
     // Restore whatever was being typed before the popup was last closed —
     // popups are destroyed on close, so this would otherwise vanish every
     // time the user tabs away to go copy a URL.

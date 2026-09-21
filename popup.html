@@ -43,15 +43,15 @@
 
       <div class="tab-panel" data-panel="today">
         <div class="mode-row">
-          <label class="mode-card mode-reading" for="reading-mode-toggle">
-            <input
-              type="checkbox"
-              id="reading-mode-toggle"
-              class="mode-checkbox-hidden"
-            />
+          <button
+            type="button"
+            class="mode-card mode-reading"
+            id="reading-card-toggle"
+            aria-expanded="false"
+          >
             <span class="mode-card-label">Reading mode</span>
-            <span class="mode-card-value" id="reading-mode-hint">Off</span>
-          </label>
+            <span class="mode-card-value" id="reading-card-state">Off</span>
+          </button>
           <button
             type="button"
             class="mode-card mode-study"
@@ -59,10 +59,51 @@
             aria-expanded="false"
           >
             <span class="mode-card-label">Study mode</span>
-            <span class="mode-card-value" id="study-card-state"
-              >Start a session</span
-            >
+            <span class="mode-card-value" id="study-card-state">Start</span>
           </button>
+          <button
+            type="button"
+            class="mode-card mode-voice"
+            id="voice-card-toggle"
+          >
+            <span class="mode-card-label">Nudge voice</span>
+            <span class="mode-card-value" id="voice-card-state">Not set</span>
+          </button>
+        </div>
+
+        <div id="reading-expanded" class="study-expanded hidden">
+          <section class="study">
+            <div id="reading-setup">
+              <label class="field-label" for="reading-duration-inline"
+                >Duration</label
+              >
+              <select id="reading-duration-inline">
+                <option value="15">15 minutes</option>
+                <option value="30" selected>30 minutes</option>
+                <option value="60">1 hour</option>
+                <option value="90">1.5 hours</option>
+              </select>
+              <button
+                type="button"
+                id="reading-turn-on"
+                class="study-start-btn reading-btn"
+              >
+                Turn on for 30m
+              </button>
+            </div>
+            <div id="reading-active" class="hidden">
+              <div class="study-timer reading-timer" id="reading-timer">
+                --:--
+              </div>
+              <button
+                type="button"
+                id="reading-turn-off"
+                class="study-start-btn secondary"
+              >
+                Turn off early
+              </button>
+            </div>
+          </section>
         </div>
 
         <div id="study-expanded" class="study-expanded hidden">
@@ -138,35 +179,6 @@
       </div>
 
       <div class="tab-panel hidden" data-panel="settings">
-        <section class="setting-card">
-          <label class="field-label" for="reading-duration"
-            >Reading mode duration</label
-          >
-          <select id="reading-duration">
-            <option value="15">15 minutes</option>
-            <option value="30" selected>30 minutes (default)</option>
-            <option value="60">1 hour</option>
-            <option value="90">1.5 hours</option>
-          </select>
-          <p class="hint">
-            How long Reading Mode stays on when you switch it on from Today.
-          </p>
-        </section>
-
-        <section class="setting-card">
-          <span class="setting-title">Nudge voice</span>
-          <button
-            type="button"
-            id="open-record-page"
-            class="study-start-btn secondary"
-          >
-            🎙️ Record my own nudge voice
-          </button>
-          <p class="hint">
-            Recorded locally, never uploaded. Managed on its own page.
-          </p>
-        </section>
-
         <section class="setting-card">
           <label class="field-label" for="tick-interval"
             >Check-in frequency</label
