@@ -3,7 +3,6 @@
 // Chrome at any time, so we never rely on in-memory state surviving —
 // everything that matters gets written to chrome.storage.local immediately.
 
-const IDLE_THRESHOLD_SECONDS = 30; // chrome.idle's own floor is 15s; this is the "how fresh must a ping be" window
 const HEARTBEAT_ALARM = "honest-hour-heartbeat";
 const DEFAULT_TICK_SECONDS = 30;
 // NOTE: chrome.alarms clamps periods under 1 minute to 1 minute for PACKED
@@ -102,6 +101,12 @@ chrome.windows.onFocusChanged.addListener((windowId) => {
 // --- Receive activity heartbeats from content scripts ---
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  // Only accept messages that originate from this extension itself (content
+  // scripts / popup / offscreen doc). No externally_connectable is declared,
+  // so a web page can't reach this today — this is defense-in-depth in case
+  // that ever changes.
+  if (sender.id !== chrome.runtime.id) return false;
+
   if (msg?.type === "activity-ping") {
     const ts = Date.now();
     // Accumulate synchronously in memory — safe against races even when
@@ -179,7 +184,11 @@ async function startStudyMode(durationMinutes, hostnames) {
         .trim()
         .toLowerCase()
         .replace(/^https?:\/\//, "")
-        .replace(/\/.*$/, ""),
+        .replace(/\/.*$/, "")
+        // Only hostname characters allowed from here on. This also strips
+        // declarativeNetRequest urlFilter syntax characters (* | ^) so a
+        // typed value can't accidentally widen or break the block rule.
+        .replace(/[^a-z0-9.-]/g, ""),
     )
     .filter(Boolean);
 
